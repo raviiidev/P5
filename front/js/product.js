@@ -1,7 +1,8 @@
-const id = new URL(window.location.href).searchParams.get('id')
+//lien d'un produit de la page d'accueil à la page produit, récupération de l'ID
+let idProduct = new URL(window.location.href).searchParams.get('id')
 
 
-fetch('http://localhost:3000/api/products/'+ id)
+fetch('http://localhost:3000/api/products/'+ idProduct)
     .then(response => response.json())
     .then(product => {
         // ADD the image
@@ -37,3 +38,21 @@ fetch('http://localhost:3000/api/products/'+ id)
             selectElement.appendChild(newOption)
         }
     })
+
+//ajoute un produit au panier
+const button = document.querySelector('#addToCart')
+button.addEventListener('click', (event) => {
+    let colors = document.querySelector('#colors').value
+    let quantity = document.querySelector('#quantity').value
+
+        let optionProduct = {
+            _id: idProduct,
+            colors: colors,
+            qty: quantity,    
+        }
+
+        localStorage.setItem('id', JSON.stringify(optionProduct))  
+        window.location.href="cart.html"
+        })
+        
+          
