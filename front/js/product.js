@@ -1,58 +1,101 @@
-//lien d'un produit de la page d'accueil à la page produit, récupération de l'ID
-let idProduct = new URL(window.location.href).searchParams.get('id')
+// utilisation de searchparams pour récupérer l'id du bon produit pour chaque objet 
+let params = new URL(document.location).searchParams;
+let id = params.get("id");
+const newUrl = "http://localhost:3000/api/products/" + id;
 
 
-fetch('http://localhost:3000/api/products/'+ idProduct)
-    .then(response => response.json())
-    .then(product => {
-        // ADD the image
-        let imgItemElement = document.getElementsByClassName('item__img');
-        let img = document.createElement('img')
-        img.src = product.imageUrl
-        imgItemElement[0].appendChild(img)
+const colors = document.getElementById("colors");
+const itemQty = document.getElementById("quantity");
+const imageURL ="";
 
-        // ADD the name
-        let titleElement = document.getElementById('title')
-        let h3 = document.createElement('h3')
-        h3.textContent = product.name
-        titleElement.appendChild(h3);
+// appel de l'api 
 
-        // ADD the price
-        let priceSpanElement = document.getElementById('price')
-        let price = document.createTextNode(product.price)
-        priceSpanElement.appendChild(price)
+fetch(newUrl)
+  .then(response => response.json())
+  .then((data) => {
+    console.log(data);
 
-        // ADD the description
-        let descriptionElement = document.getElementById('description')
-        let descri = document.createTextNode(product.description)
-        descriptionElement.appendChild(descri)
+    resultApi = data;
 
-        //ADD the colors options
-        let selectElement = document.getElementById('colors')
-        let colors = product.colors
-        for(let c of colors) {
-            let newOption = document.createElement('option')
-            newOption.value = c
-            let colorText = document.createTextNode(c)
-            newOption.appendChild(colorText)
-            selectElement.appendChild(newOption)
-        }
-    })
+    // const pour afficher les produits de l'Api 
+    const image = document.querySelector('.item__img');
+    const titre = document.querySelector('#title');
+    const prix = document.querySelector('#price');
+    const description = document.querySelector('#description');
+    const colors = document.querySelector('#colors');
+    let imageURL = "";
+    let imageAlt = "";
 
-//ajoute un produit au panier
-const button = document.querySelector('#addToCart')
-button.addEventListener('click', (event) => {
-    let colors = document.querySelector('#colors').value
-    let quantity = document.querySelector('#quantity').value
+    // mise en page de l'api avec le DOM
+    image.innerHTML = `<img src="${resultApi.imageUrl}" alt="${resultApi.altTxt}">`;
+    imageURL = resultApi.imageUrl;
+    imageAlt = resultApi.altTxt;
+    titre.innerHTML = `${resultApi.name}`;
+    prix.innerText = `${resultApi.price }`;
+    description.innerText = `${resultApi.description}`;
 
-        let optionProduct = {
-            _id: idProduct,
-            colors: colors,
-            qty: quantity,    
-        }
+    // boucle pour mettre en place les options de couleurs 
+    for(let i in resultApi.colors){
+      colors.innerHTML += `<option value="${resultApi.colors[i]}">${resultApi.colors[i]}</option>`
+    }
+    
+    // création du formulaire d'envoi du bouton 
+    let sendToCart = document.getElementById("addToCart");
+    sendToCart.addEventListener("click", (event) => {
+      window.location.href="cart.html"
+      event.preventDefault();
 
-        localStorage.setItem('id', JSON.stringify(optionProduct))  
-        window.location.href="cart.html"
-        })
+    // recupération des données dans le local storage
+    let cart = JSON.parse(localStorage.getItem('cart'));
+    console.log(cart);
+
+     //ajout au panier et enregistre dans le localstorage
+      const addItemInLocal = () => {
+        cart.push(arrayItem); 
+        localStorage.setItem('cart', JSON.stringify(cart));
+        console.log(addItemInLocal);
+      }
+
+      const addConfirm = () => {
+        alert('Le produit a été ajouté au panier');
+      }
+
+      // création du tableau d'informations que je vais retourner au localStorage
+    const arrayItem = {
+
+      id: id,
+      alt: imageAlt,
+      image: imageURL,
+      name: titre.innerHTML,
+      price: prix.innerHTML,
+      color: colors.value,
+      quantity: itemQty.value,
+    };
+    console.log(arrayItem);
+
+      let update = false;
+
+      // s'il y a des produits enregistrés dans le localStorage
+      if (cart) {
+        const resultFind = cart.find(
+          (e) => e.id === id && e.color === colors.value);
         
-          
+
+        // s'il y a déjà un produit enregistré dans le storage
+        if (!update) {
+          addItemInLocal();
+          addConfirm();
+          console.log(cart);
+        }
+      }
+
+      // s'il n'y a aucun produit enregistré dans le localStorage 
+      else {
+        cart = [];
+        addItemInLocal();
+        addConfirm();
+        console.log(cart);
+      }
+
+    });
+  });
