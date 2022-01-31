@@ -1,11 +1,15 @@
+//sélectionne #items dans html
 const container = document.querySelector("#items");
 
+//connexion à l'API
 fetch("http://localhost:3000/api/products")
-.then( reponse => {
-    return reponse.json();
+
+//promise pour récupérer tous les canapés de façon asynchrone
+.then(reponse => {  
+    return reponse.json(); 
 })
 
-.then((dataKanap) => {
+.then((dataKanap) => { 
     const allKanap = dataKanap;
     // console.log(allKanap);
     allKanap.forEach(element => {
