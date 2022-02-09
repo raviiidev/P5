@@ -1,152 +1,189 @@
-/*//Récupère les données du local storage
-let cart = JSON.parse(localStorage.getItem('cart'));
-console.log('les canapés', cart);
-const cartContainer = document.getElementById('cart__items');
+/*const cart = []
 
-// si le panier est vide :
-if (cart === null || cart == 0) {
- cartContainer.innerHTML = `<div class="cart__item__img"> <p> Merci de sélectionner un produit </p></div>`
+//Récuperation des produits
+retrieveitem()
+cart.forEach((item) => displayItem(item))
+
+//Ecoute de l'évènement au click lorsqu'on passe commande
+const orderButton = document.querySelector('#order')
+orderButton.addEventListener('click', (e) => submitForm(e))
+
+//Affiche et ajoute les produits du localstorage
+function retrieveitem() {
+  const numberOfItems = localStorage.length
+  for (let i = 0; i < numberOfItems; i++) {
+    const item = localStorage.getItem(localStorage.key(i)) || ''
+    const itemObject = JSON.parse(item)
+    cart.push(itemObject)
+  }
 }
-// si le panier contient un produit :
-else {
 
-  let affichage = "";
+//Affiche le produit
+function displayItem(item) {
+  const article = makeArticle(item)
+  const imageDiv = makeImageDiv(item)
+  article.appendChild(imageDiv)
 
-  // boucle forEach pour attribuer les différentes values 
-  cart.forEach((item) => {
-    const { id, price, color, alt, name, quantity, image } = item;
+  const cardItemContent = makeCartContent(item)
+  article.appendChild(cardItemContent)
+  displayArticle(article) //affiche l'article + total qté + total prix
+  displayTotalQuantity()
+  displayTotalPrice()
+}
 
-    affichage += `
-    
-    <article class="cart__item" data-id="${id}" data-color="${color}">
-    <div class="cart__item__img">
-      <img src="${image}" alt="${alt}">
-    </div>
-    <div class="cart__item__content">
-      <div class="cart__item__content__titlePrice">
-        <h2>${name}</h2>
-        <p>${color}</p>
-        <p>${price} €</p>
-      </div>
-      <div class="cart__item__content__settings">
-        <div class="cart__item__content__settings__quantity">
-          <p>Qté : </p>
-          <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${quantity}">
-        </div>
-        <div class="cart__item__content__settings__delete">
-          <p class="deleteItem">Supprimer</p>
-        </div>
-      </div>
-    </div>
-  </article>
-    `
+//Affiche le total des quantités
+function displayTotalQuantity() {
+  const totalQuantity = document.querySelector('#totalQuantity')
+  const total = cart.reduce((total, item) => total + item.quantity, 0) //premiere valeur de qté=0
+  totalQuantity.textContent = total
+}
 
-    document.getElementById('cart__items').innerHTML = affichage;
- 
-    console.table(cart);
-    
-    // fonction pour afficher les prix dans le html || servira pour raffraichir les prix ensuite 
-    function updateQuantityPrice(){
+//Affiche le total des prix calcul le prix avec reduce
+function displayTotalPrice() {
+  const totalPrice = document.querySelector('#totalPrice')
 
-      // je récupère les quantités
-    let itemQtt = document.getElementsByClassName('itemQuantity');
-    let pdtLength = itemQtt.length; //somme (des qtés)
+  const total = cart.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0,
+  )
+  totalPrice.textContent = total
+}
 
-    // j'initialise ma variable pour le total des quantités
-    let totalQtt = 0;
+//
+function makeCartContent(item) {
+  const cardItemContent = document.createElement('div')
+  cardItemContent.classList.add('cart__item__content')
 
-    // je boucle pour savoir le total des quantités
-    for (var q = 0; q < pdtLength; q++) {
-      totalQtt += itemQtt[q].valueAsNumber;
-    };
+  const description = makeDescription(item)
+  const settings = makeSettings(item)
 
-    // je transmet le résultat à mon html 
-    let qttDisplay = document.getElementById('totalQuantity');
-    qttDisplay.innerHTML = totalQtt;
-    console.log(totalQtt);
+  cardItemContent.appendChild(description)
+  cardItemContent.appendChild(settings)
+  return cardItemContent
+}
 
-    // j'initialise ma variable pour le total des prix
-    let totalPrice = 0;
+//makeSettings = quantité + delete
+function makeSettings(item) {
+  const settings = document.createElement('div')
+  settings.classList.add('cart__item__content__settings')
 
-    // je boucle pour avoir le prix des articles en fonction des quantités 
-    for (let q = 0; q < pdtLength; q++) {
-      totalPrice += (itemQtt[q].valueAsNumber * cart[q].price);
-    };
+  addQuantityToSettings(settings, item)
+  addDeleteToSettings(settings, item)
+  return settings
+}
 
-    // je transmet le résultat à mon html 
-    let priceDisplay = document.getElementById('totalPrice');
-    let fix = Math.round(totalPrice);
-    priceDisplay.innerHTML = fix;
+//Supprime les produits du panier
+function addDeleteToSettings(settings, item) {
+  const div = document.createElement('div')
+  div.classList.add('cart__item__content__settings__delete')
+  div.addEventListener('click', () => deleteItem(item))
 
-    // pour finir je set mon cart (sera surtout utile quand je delete un canapé)
-    localStorage.setItem("cart", JSON.stringify(cart));
-    
-    };//fin function
+  const p = document.createElement('p')
+  p.textContent = 'Supprimer'
+  div.appendChild(p)
+  settings.appendChild(div)
+}
 
-    updateQuantityPrice();
-   
+//fonction delete
+function deleteItem(item) {
+  const itemToDelete = cart.findIndex(
+    (product) => product.id === item.id && product.color === item.color,
+  )
+  cart.splice(itemToDelete, 1)
+  displayTotalPrice()
+  displayTotalQuantity()
+  deleteDataFromCache(item)
+  deleteArticleFromPage(item)
+}
+function deleteArticleFromPage(item) {
+  const articleToDelete = document.querySelector(
+    `article[data-id="${item.id}"][data-color="${item.color}"]`,
+  )
+  articleToDelete.remove()
+}
+//fonction quantité
+function addQuantityToSettings(settings, item) {
+  const quantity = document.createElement('div')
+  quantity.classList.add('cart__item__content__settings__quantity')
+  const p = document.createElement('p')
+  p.textContent = 'Qté : '
+  quantity.appendChild(p)
+  const input = document.createElement('input')
+  input.type = 'number'
+  input.classList.add('itemQuantity')
+  input.name = 'itemQuantity'
+  input.min = '1'
+  input.max = '100'
+  input.value = item.quantity
+  input.addEventListener('input', () =>
+    updatePriceAndQuantity(item.id, input.value, item),
+  )
 
-  
-    // fonction pour supprimer un produit choisi
-    function deleteProduct() {
-      let deleteItem = document.querySelectorAll(".deleteItem");
+  quantity.appendChild(input)
+  settings.appendChild(quantity)
+}
 
-      for (let s = 0; s < deleteItem.length; s++) {
-        deleteItem[s].addEventListener("click", (event) => {
-          event.preventDefault();
+function updatePriceAndQuantity(id, newValue, item) {
+  const itemToUpdate = cart.find((item) => item.id === id)
+  itemToUpdate.quantity = Number(newValue)
+  item.quantity = itemToUpdate.quantity
+  displayTotalQuantity()
+  displayTotalPrice()
+  saveNewDataToCache(item)
+}
 
-          let idDelete = cart[s].id;
-          let colorDelete = cart[s].color;
+function deleteDataFromCache(item) {
+  const key = `${item.id}-${item.color}`
+  localStorage.removeItem(key)
+}
 
-          // méthode filter pour trouver le bon élément de la boucle 
-          cart = cart.filter(el => el.id !== idDelete || el.color !== colorDelete);
+//Sauvegarde le nouveau tableau dans le local storage
+function saveNewDataToCache(item) {
+  const dataToSave = JSON.stringify(item)
+  const key = `${item.id}-${item.color}`
+  localStorage.setItem(key, dataToSave)
+}
 
-          // removeChild pour enlever dynamiquement le html de l'article
-          let target = document.getElementById('cart__items');
-          target.childNodes[s];
-          target.removeChild(target.children[s]);
+//rassemble h2 + color + price
+function makeDescription(item) {
+  const description = document.createElement('div')
+  description.classList.add('cart__item__content__description')
 
-          // update des prix et quantités de façon dynamique 
-          updateQuantityPrice();
-        })
-        
-      }
-    }
-    deleteProduct();
+  const h2 = document.createElement('h2')
+  h2.textContent = item.name
+  const p = document.createElement('p')
+  p.textContent = item.color
+  const p2 = document.createElement('p')
+  p2.textContent = item.price + ' €'
 
-    
-    // fonction pour que l'utilisateur puisse changer la quantité d'un canapé 
-    function qttChange() {
+  description.appendChild(h2)
+  description.appendChild(p)
+  description.appendChild(p2)
+  return description
+}
 
-      let itemqtt = document.querySelectorAll(".itemQuantity");
+//Affiche l'article
+function displayArticle(article) {
+  document.querySelector('#cart__items').appendChild(article)
+}
 
-      // je boucle la longueur pour chaque quantité 
-      for (let k = 0; k < itemqtt.length; k++) {
-        itemqtt[k].addEventListener("change", (e) => {
-          e.preventDefault();
+//
+function makeArticle(item) {
+  const article = document.createElement('article')
+  article.classList.add('card__item')
+  article.dataset.id = item.id
+  article.dataset.color = item.color
+  return article
+}
 
-          //je sélectionne l'élément à modifier 
-          const qttSelect = cart[k].quantity;
-          const qttValue = itemqtt[k].valueAsNumber;
+//Affiche l'affiche
+function makeImageDiv(item) {
+  const div = document.createElement('div')
+  div.classList.add('cart__item__img')
 
-          // je cherche l'élement que je veux avec la méthode find 
-          const qttSearch = cart.find((el) => el.qttValue !== qttSelect);
-
-          qttSearch.quantity = qttValue;
-          cart[k].quantity = qttSearch.quantity;
-
-          // je remplace le panier avec les bonnes valeurs 
-          updateQuantityPrice();
-
-        });
-      };
-
-    };
-    qttChange();
-
-
-  });// fin du for each 
-
-
-}; // fin de else 
-*/
+  const image = document.createElement('img')
+  image.src = item.imageUrl
+  image.alt = item.altTxt
+  div.appendChild(image)
+  return div
+}*/
