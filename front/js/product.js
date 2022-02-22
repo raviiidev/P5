@@ -6,7 +6,7 @@ const colors = document.getElementById('colors')
 const itemQty = document.getElementById('quantity')
 let myProduct = {}
 
-//appel des éléments depuis l'API
+//appel des éléments depuis le DOM
 const image = document.querySelector('.item__img')
 const titre = document.querySelector('#title')
 const prix = document.querySelector('#price')
@@ -26,14 +26,15 @@ function optionColors(colors) {
 fetch(UrlProduct)
   .then((response) => response.json())
   .then((data) => {
-    //relié API et HTML
+    //relié Dom à l'api
     image.innerHTML = `<img src="${data.imageUrl}" alt="${data.altTxt}">`
     titre.innerHTML = `${data.name}`
     prix.innerHTML = `${data.price}`
     description.innerHTML = `${data.description}`
     const colors = data.colors
-    optionColors(colors) // clé de l'objet myProduct
+    optionColors(colors)
 
+    // créer l'objet myProduct avec la clé API
     myProduct.id = data._id
     myProduct.name = data.name
     myProduct.price = data.price
@@ -43,15 +44,13 @@ fetch(UrlProduct)
   .catch(function () {
     console.log('Fetch Erreur')
     alert(
-      'Veuillez nous excuser les produits ne sont pas disponible pour le moment.',
+      "Veuillez nous excuser le produit n'est pas disponible pour le moment.",
     )
   })
 
 //bouton ajout au panier
 const buttonPanier = document.querySelector('#addToCart')
 buttonPanier.addEventListener('click', () => {
-  window.location.href = 'cart.html'
-  
   // création tableau vide
   let arrayItem = []
 
@@ -62,31 +61,31 @@ buttonPanier.addEventListener('click', () => {
     alert('Votre article a été ajouté au panier')
   }
 
+  // local storage
   let produitPanier = {
     id: myProduct.id,
     name: myProduct.name,
-    price: myProduct.price,
     color: colorProduct,
     quantity: parseInt(quantityProduct, 10), //rajoute une quantité décimale
     img: myProduct.imageUrl,
     alt: myProduct.altTxt,
   }
-  console.log(produitPanier)
 
   if (produitPanier.quantity <= 0 || produitPanier.quantity > 100) {
-    alert("Veuillez indiquer un nombre d'article entre 1 et 100")
-    return //ok
+    alert("Indiquez un nombre d'article entre 1 et 100")
+    return
   }
   if (produitPanier.color == '') {
-    //ok couleur
-    alert('Veuillez choisir une couleur')
+    alert('Sélectionnez une couleur')
     return
   }
 
   //rajoute le produit dans le local storage s'il y a déjà un produit dans le panier
 
   if (localStorage.getItem('panier')) {
-    arrayItem = JSON.parse(localStorage.getItem('panier'))
+    //récupère les données dans le local storage
+
+    arrayItem = JSON.parse(localStorage.getItem('panier')) // JSON en JS
 
     for (let i in arrayItem) {
       if (
@@ -99,6 +98,7 @@ buttonPanier.addEventListener('click', () => {
         arrayItem[i].quantity = arrayItem[i].quantity + produitPanier.quantity
 
         localStorage.setItem('panier', JSON.stringify(arrayItem))
+        window.location.href = 'cart.html'
         alertPanier()
         return
       }

@@ -1,3 +1,4 @@
+//récupère les données du local storage
 let arrayItem = JSON.parse(localStorage.getItem('panier'))
 console.log('les canapés', arrayItem)
 const cartContainer = document.getElementById('cart__items')
@@ -19,10 +20,11 @@ else {
       arrayItem.forEach((product) => {
         const { id, color, alt, name, quantity, img } = product
         const data = response
+        //cherche dans le tableau l'ID correspondant
         const search = data.find((el) => el._id === id)
         const price = search.price
 
-        //relie
+        //relie et affiche les produits selectionnés entre le HTML et le DOM
         affichage += ` 
     
     <article class="cart__item" data-id="${id}" data-color="${color}">
@@ -52,21 +54,21 @@ else {
 
         console.table(arrayItem)
 
-        // fonction pour afficher les prix dans le html || servira pour raffraichir les prix ensuite
+        // fonction pour afficher les prix || servira pour raffraichir les prix ensuite
         function updateQuantityPrice() {
           // je récupère les quantités
           let itemQtt = document.getElementsByClassName('itemQuantity')
           let pdtLength = itemQtt.length
 
-          // j'initialise ma variable pour le total des quantités
+          // j'initialise le compteur de ma variable à 0 (pour le total des quantités)
           let totalQtt = 0
 
           // je boucle pour savoir le total
-          for (var q = 0; q < pdtLength; q++) {
-            totalQtt += itemQtt[q].valueAsNumber
+          for (let q = 0; q < pdtLength; q++) {
+            totalQtt += itemQtt[q].valueAsNumber //change la valeur chaine de caractère en nb
           }
 
-          // je transmet le résultat à mon html
+          // je transmet le résultat
           let qttDisplay = document.getElementById('totalQuantity')
           qttDisplay.innerHTML = totalQtt
           console.log(totalQtt)
@@ -79,12 +81,12 @@ else {
             totalPrice += itemQtt[q].valueAsNumber * price
           }
 
-          // je transmet le résultat à mon html
+          // je transmet le résultat 
           let priceDisplay = document.getElementById('totalPrice')
-          let fix = Math.round(totalPrice)
+          let fix = Math.round(totalPrice) //arrondi à l'entier le plus proche
           priceDisplay.innerHTML = fix
 
-          // pour finir je set mon cart (sera surtout utile quand je delete un canapé)
+          // pour finir je set mon panier (sera surtout utile quand je delete un canapé)
           localStorage.setItem('panier', JSON.stringify(arrayItem))
         }
         updateQuantityPrice()
@@ -106,7 +108,8 @@ else {
               )
               arrayItem.splice(s, 0) //modifie dans le tableau
               localStorage.setItem('panier', JSON.stringify(arrayItem))
-              location.reload()
+              location.reload() //recharge la ressource depuis l'URL actuelle.
+              alert ("Article supprimé du panier")
 
               // update des prix et quantités de façon dynamique
               updateQuantityPrice()
@@ -115,7 +118,7 @@ else {
         }
         deleteProduct()
 
-        // fonction pour que l'utilisateur puisse changer la quantité d'un canapé
+        // fonction pour que l'utilisateur puisse modifier la quantité d'un canapé
         function qttChange() {
           let itemqtt = document.querySelectorAll('.itemQuantity')
 
@@ -123,8 +126,8 @@ else {
           for (let k = 0; k < itemqtt.length; k++) {
             itemqtt[k].addEventListener('change', (e) => {
               e.preventDefault()
-
-              //je sélectionner l'élément à modifier
+ 
+              //je sélectionne l'élément à modifier
               const qttSelect = arrayItem[k].quantity
               const qttValue = itemqtt[k].valueAsNumber
 
@@ -135,17 +138,17 @@ else {
 
               qttSearch.quantity = qttValue
               arrayItem[k].quantity = qttSearch.quantity
+             
 
-      
               // je remplace le panier avec les bonnes valeurs
               updateQuantityPrice()
             })
           }
         }
         qttChange()
-      }) // fin du fetch
-    }) // fin du for each
-} // fin de else
+      })
+    })
+}
 
 // partie formulaire
 
@@ -155,7 +158,7 @@ let form = document.querySelector('.cart__order__form')
 let emailCheck = new RegExp(
   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
 )
-let nameCheck = new RegExp("^[a-zA-Z ,.'-àâäéèêëïîôöùûüç]+$")
+let nameCheck = new RegExp("^[a-zA-Zéè-]+$")
 let cityCheck = new RegExp('^[a-zA-Z]+(?:[s-][a-zA-Z]+)*$')
 let addressCheck = new RegExp(
   '^[0-9]{1,3}(?:(?:[,. ]){1}[-a-zA-Zàâäéèêëïîôöùûüç]+)+',
@@ -251,7 +254,7 @@ const validEmail = function (inputEmail) {
   }
 }
 
-// bouton commander 
+// bouton commander
 function checkFinal() {
   const btn_commander = document.getElementById('order')
 
@@ -289,6 +292,7 @@ function checkFinal() {
         products: itemId,
       }
 
+      //envoi les données au serveur
       const options = {
         method: 'POST',
         body: JSON.stringify(order),
@@ -298,7 +302,6 @@ function checkFinal() {
         },
       }
 
-//envoi au serveur
       fetch('http://localhost:3000/api/products/order', options)
         .then((response) => response.json())
         .then((data) => {
@@ -308,7 +311,7 @@ function checkFinal() {
 
           document.location.href = `confirmation.html?orderId=${data.orderId}`
         })
-    } // fin du if
-  }) // fin du addEvent orderBtn
+    }
+  })
 }
 checkFinal()
