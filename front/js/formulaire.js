@@ -4,7 +4,7 @@ let form = document.querySelector('.cart__order__form')
 let emailCheck = new RegExp(
   '^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9._]+[.]{1}[a-z]{2,10}$',
 )
-let nameCheck = new RegExp("^[a-zA-Z ,.'-àâäéèêëïîôöùûüç]+$")
+let nameCheck = new RegExp('^[a-zA-Zéè-]+$')
 let cityCheck = new RegExp('^[a-zA-Z]+(?:[s-][a-zA-Z]+)*$')
 let addressCheck = new RegExp(
   '^[0-9]{1,3}(?:(?:[,. ]){1}[-a-zA-Zàâäéèêëïîôöùûüç]+)+',
@@ -136,8 +136,9 @@ function checkFinal() {
           email: saisirEmail.value,
         },
         products: itemId,
-      } //méthode post = envoi au serveur
+      }
 
+      //méthode post = envoi au serveur
       const options = {
         method: 'POST',
         body: JSON.stringify(order),
@@ -147,13 +148,9 @@ function checkFinal() {
         },
       }
 
-      fetch('http://localhost:3000/api/products/order', options)
+      fetch('http://localhost:3000/api/products/order/', options)
         .then((response) => response.json())
         .then((data) => {
-          console.log(data)
-          localStorage.clear()
-          localStorage.setItem('orderId', data.orderId)
-
           document.location.href = `confirmation.html?orderId=${data.orderId}`
         })
     } // fin du if

@@ -20,14 +20,18 @@ const recuperationCanapesAPI = async function () {
         infoFromLocalStorage.quantity = canape.quantity
 
         informationsCanapesUtilisateur[index] = Object.assign(
+          //clone l'objet
           infoFromLocalStorage,
           response.find((el) => el._id === canape.id),
         )
       })
 
-      console.log(informationsCanapesUtilisateur) // Une fois que la boucle est terminée on renvoie le tableau "informationsCanapesUtilisateur" // et cela afin de pouvoir faire s'en servir pour faire des traitements dessus dans le reste de notre script
+      console.log(informationsCanapesUtilisateur)
+      // Une fois que la boucle est terminée on renvoie le tableau "informationsCanapesUtilisateur"
+      // et cela afin de pouvoir faire s'en servir pour faire des traitements dessus dans le reste de notre script
 
       return informationsCanapesUtilisateur
+      //promesse resolue
     })
     .catch(function () {
       cartContainer.innerHTML = `<p>Une erreur est survenue. Merci de contacter le support client.</p>`
@@ -85,7 +89,7 @@ const miseAJourPrix = function (canapesUtilisateur) {
   totalQuantity.innerHTML = sommeDesQuantites
 
   let priceDisplay = document.querySelector('#totalPrice')
-  priceDisplay.innerHTML = Math.round(sommeDesPrix)
+  priceDisplay.innerHTML = Math.round(sommeDesPrix) //arrondi à l'entier proche
 }
 
 const miseAJourQuantite = function (canapesUtilisateur) {
@@ -96,17 +100,19 @@ const miseAJourQuantite = function (canapesUtilisateur) {
 
       const canapesLocalStorage = JSON.parse(localStorage.getItem('panier'))
 
-      const parent = input.closest('article')
+      const parent = input.closest('article') //parent plus proche
       const canapeId = parent.getAttribute('data-id')
       const canapeColor = parent.getAttribute('data-color')
-      const quantite = input.valueAsNumber // On va mettre à jour la quantité dans le tableau du localStorage
-
+      const quantite = input.valueAsNumber
+      
+      // On va mettre à jour la quantité dans le tableau du localStorage
       const indexTableauLS = canapesLocalStorage.findIndex(
         (el) => el.id === canapeId && el.color === canapeColor,
       )
       canapesLocalStorage[indexTableauLS].quantity = quantite
-      localStorage.setItem('panier', JSON.stringify(canapesLocalStorage)) // On va mettre à jour la quantité dans l'objet canapesUtilisateur
+      localStorage.setItem('panier', JSON.stringify(canapesLocalStorage)) 
 
+      // On va mettre à jour la quantité dans l'objet canapesUtilisateur
       const indexTableauCanapes = canapesUtilisateur.findIndex(
         (el) => el._id === canapeId && el.color === canapeColor,
       )
@@ -123,7 +129,7 @@ const suppressionCanape = function () {
     bouton.addEventListener('click', (event) => {
       event.preventDefault()
 
-      const parent = bouton.closest('article')
+      const parent = bouton.closest('article')// parent
       const canapeId = parent.getAttribute('data-id')
       const canapeCouleur = parent.getAttribute('data-color')
 
@@ -132,6 +138,7 @@ const suppressionCanape = function () {
       )
 
       localStorage.setItem('panier', JSON.stringify(nouvelleValeurLocalStorage))
+      alert("L'article a bien été supprimé")
 
       location.reload()
     })
