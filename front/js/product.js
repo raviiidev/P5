@@ -2,16 +2,16 @@ const url = new URL(window.location.href)
 const idProduct = url.searchParams.get('id')
 const UrlProduct = `http://localhost:3000/api/products/${idProduct}`
 
+//appel des éléments depuis le DOM
 const colors = document.getElementById('colors')
 const itemQty = document.getElementById('quantity')
-let myProduct = {}
-
-//appel des éléments depuis le DOM
 const image = document.querySelector('.item__img')
 const titre = document.querySelector('#title')
 const prix = document.querySelector('#price')
 const description = document.querySelector('#description')
+let myProduct = {}
 
+//fonction afficher les couleurs
 function optionColors(colors) {
   const select = document.querySelector('#colors')
   colors.forEach((couleur) => {
@@ -22,7 +22,7 @@ function optionColors(colors) {
 }
 
 // appel de l'api
-//affiche des produits dans la page produit
+//affiche les produits dans la page produit
 fetch(UrlProduct)
   .then((response) => response.json())
   .then((data) => {
@@ -36,10 +36,9 @@ fetch(UrlProduct)
 
     // créer l'objet myProduct avec la clé API
     myProduct.id = data._id
-    myProduct.name = data.name
-    myProduct.price = data.price
-    myProduct.imageUrl = data.imageUrl
-    myProduct.altTxt = data.altTxt
+    myProduct.colors = data.colors
+    myProduct.quantity = data.quantity
+  
   })
   .catch(function () {
     console.log('Fetch Erreur')
@@ -65,6 +64,7 @@ buttonPanier.addEventListener('click', () => {
   let produitPanier = {
     id: myProduct.id,
     name: myProduct.name,
+    price: myProduct.price,
     color: colorProduct,
     quantity: parseInt(quantityProduct, 10), //rajoute une quantité décimale
     img: myProduct.imageUrl,

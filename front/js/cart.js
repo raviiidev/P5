@@ -1,317 +1,146 @@
-//récupère les données du local storage
 let arrayItem = JSON.parse(localStorage.getItem('panier'))
-console.log('les canapés', arrayItem)
-const cartContainer = document.getElementById('cart__items')
+console.table(arrayItem)
 
-// si le panier est vide :
-if (arrayItem === null || arrayItem == 0) {
-  const empty = `<p>Votre panier est vide</p>`
-  cartContainer.innerHTML = empty
-}
+const cartContainer = document.querySelector('#cart__items')
 
-// si pas vide
-else {
-  let affichage = ''
+const recuperationCanapesAPI = async function () {
+  const canapesLocalStorage = JSON.parse(localStorage.getItem('panier'))
 
-  fetch('http://localhost:3000/api/products/')
+  let informationsCanapesUtilisateur = []
+
+  return fetch('http://localhost:3000/api/products/')
     .then((response) => response.json())
     .then((response) => {
-      // boucle forEach pour attribuer les différente values
-      arrayItem.forEach((product) => {
-        const { id, color, alt, name, quantity, img } = product
-        const data = response
-        //cherche dans le tableau l'ID correspondant
-        const search = data.find((el) => el._id === id)
-        const price = search.price
+      canapesLocalStorage.forEach((canape, index) => {
+        // On créé une variable => canapeDansAPI
+        // cette variable nous permet de récupérer les informations d'un canapé dans l'API
+        // dont l'id correspond à l'id d'un canapé présent dans le localStorage
+        const infoFromLocalStorage = {}
+        infoFromLocalStorage.color = canape.color
+        infoFromLocalStorage.quantity = canape.quantity
 
-        //relie et affiche les produits selectionnés entre le HTML et le DOM
-        affichage += ` 
-    
-    <article class="cart__item" data-id="${id}" data-color="${color}">
-    <div class="cart__item__img">
-      <img src="${img}" alt="${alt}">
-    </div>
-    <div class="cart__item__content">
-      <div class="cart__item__content__titlePrice">
-        <h2>${name}</h2>
-        <p>${color}</p>
-        <p>${price} €</p>
-      </div>
-      <div class="cart__item__content__settings">
-        <div class="cart__item__content__settings__quantity">
-          <p>Qté : </p>
-          <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${quantity}" onFocus="this.blur()"> 
-        </div>
-        <div class="cart__item__content__settings__delete">
-          <p class="deleteItem">Supprimer</p>
-        </div>
-      </div>
-    </div>
-  </article>
-    `
-
-        document.getElementById('cart__items').innerHTML = affichage
-
-        console.table(arrayItem)
-
-        // fonction pour afficher les prix || servira pour raffraichir les prix ensuite
-        function updateQuantityPrice() {
-          // je récupère les quantités
-          let itemQtt = document.getElementsByClassName('itemQuantity')
-          let pdtLength = itemQtt.length
-
-          // j'initialise le compteur de ma variable à 0 (pour le total des quantités)
-          let totalQtt = 0
-
-          // je boucle pour savoir le total
-          for (let q = 0; q < pdtLength; q++) {
-            totalQtt += itemQtt[q].valueAsNumber //change la valeur chaine de caractère en nb
-          }
-
-          // je transmet le résultat
-          let qttDisplay = document.getElementById('totalQuantity')
-          qttDisplay.innerHTML = totalQtt
-          console.log(totalQtt)
-
-          // j'initialise ma variable pour le total des prix
-          let totalPrice = 0
-
-          // je boucle pour avoir le prix des articles en fonction des quantités
-          for (let q = 0; q < pdtLength; q++) {
-            totalPrice += itemQtt[q].valueAsNumber * price
-          }
-
-          // je transmet le résultat 
-          let priceDisplay = document.getElementById('totalPrice')
-          let fix = Math.round(totalPrice) //arrondi à l'entier le plus proche
-          priceDisplay.innerHTML = fix
-
-          // pour finir je set mon panier (sera surtout utile quand je delete un canapé)
-          localStorage.setItem('panier', JSON.stringify(arrayItem))
-        }
-        updateQuantityPrice()
-
-        // fonction pour supprimer un produit choisi
-        function deleteProduct() {
-          let deleteItem = document.querySelectorAll('.deleteItem')
-
-          for (let s = 0; s < deleteItem.length; s++) {
-            deleteItem[s].addEventListener('click', (event) => {
-              event.preventDefault()
-
-              let idDelete = arrayItem[s].id
-              let colorDelete = arrayItem[s].color
-
-              // méthode filter pour trouver le bon élément de la boucle
-              arrayItem = arrayItem.filter(
-                (el) => el.id !== idDelete || el.color !== colorDelete,
-              )
-              arrayItem.splice(s, 0) //modifie dans le tableau
-              localStorage.setItem('panier', JSON.stringify(arrayItem))
-              location.reload() //recharge la ressource depuis l'URL actuelle.
-              alert ("Article supprimé du panier")
-
-              // update des prix et quantités de façon dynamique
-              updateQuantityPrice()
-            })
-          }
-        }
-        deleteProduct()
-
-        // fonction pour que l'utilisateur puisse modifier la quantité d'un canapé
-        function qttChange() {
-          let itemqtt = document.querySelectorAll('.itemQuantity')
-
-          // je boucle la longueur pour chaque quantité
-          for (let k = 0; k < itemqtt.length; k++) {
-            itemqtt[k].addEventListener('change', (e) => {
-              e.preventDefault()
- 
-              //je sélectionne l'élément à modifier
-              const qttSelect = arrayItem[k].quantity
-              const qttValue = itemqtt[k].valueAsNumber
-
-              // je cherche l'élement que je veux avec la méthode find
-              const qttSearch = arrayItem.find(
-                (el) => el.qttValue !== qttSelect,
-              )
-
-              qttSearch.quantity = qttValue
-              arrayItem[k].quantity = qttSearch.quantity
-             
-
-              // je remplace le panier avec les bonnes valeurs
-              updateQuantityPrice()
-            })
-          }
-        }
-        qttChange()
+        informationsCanapesUtilisateur[index] = Object.assign(
+          infoFromLocalStorage,
+          response.find((el) => el._id === canape.id),
+        )
       })
+
+      console.log(informationsCanapesUtilisateur) // Une fois que la boucle est terminée on renvoie le tableau "informationsCanapesUtilisateur" // et cela afin de pouvoir faire s'en servir pour faire des traitements dessus dans le reste de notre script
+
+      return informationsCanapesUtilisateur
+    })
+    .catch(function () {
+      cartContainer.innerHTML = `<p>Une erreur est survenue. Merci de contacter le support client.</p>`
     })
 }
 
-// partie formulaire
+const affichageDesCanapes = async function () {
+  const canapesUtilisateur = await recuperationCanapesAPI()
 
-let form = document.querySelector('.cart__order__form')
+  let affichage = ''
 
-// Ajout des Regex
-let emailCheck = new RegExp(
-  /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-)
-let nameCheck = new RegExp("^[a-zA-Zéè-]+$")
-let cityCheck = new RegExp('^[a-zA-Z]+(?:[s-][a-zA-Z]+)*$')
-let addressCheck = new RegExp(
-  '^[0-9]{1,3}(?:(?:[,. ]){1}[-a-zA-Zàâäéèêëïîôöùûüç]+)+',
-)
+  canapesUtilisateur.forEach((canape) => {
+    affichage += `
+      <article class="cart__item" data-id="${canape._id}" data-color="${canape.color}">
+        <div class="cart__item__img">
+          <img src="${canape.imageUrl}" alt="${canape.altTxt}">
+        </div>
+        <div class="cart__item__content">
+          <div class="cart__item__content__titlePrice">
+            <h2>${canape.name}</h2>
+            <p>${canape.color}</p>
+            <p>${canape.price} €</p>
+          </div>
+          <div class="cart__item__content__settings">
+            <div class="cart__item__content__settings__quantity">
+              <p>Qté : </p>
+              <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${canape.quantity}">
+            </div>
+            <div class="cart__item__content__settings__delete">
+              <p class="deleteItem">Supprimer</p>
+            </div>
+          </div>
+        </div>
+      </article>
+    `
+  })
 
-// Ecoute de la modification du nom
-form.firstName.addEventListener('change', function () {
-  validFirstName(this)
-})
+  cartContainer.innerHTML = affichage // On fait appel aux autres fonctions
 
-// Ecoute de la modification du prénom
-form.lastName.addEventListener('change', function () {
-  validLastName(this)
-})
-
-// Ecoute de la modification de l'adresse
-form.address.addEventListener('change', function () {
-  validAddress(this)
-})
-
-// Ecoute de la modification de la ville
-form.city.addEventListener('change', function () {
-  validCity(this)
-})
-
-// Ecoute de la modification du mail
-form.email.addEventListener('change', function () {
-  validEmail(this)
-})
-
-//validation du prénom
-const validFirstName = function (inputFirstName) {
-  let firstNameErrorMsg = inputFirstName.nextElementSibling //donne la balise suivante
-
-  if (nameCheck.test(inputFirstName.value)) {
-    firstNameErrorMsg.innerHTML = ''
-    return true
-  } else {
-    firstNameErrorMsg.innerHTML = "Le champ n'est pas valide !"
-    return false
-  }
+  miseAJourPrix(canapesUtilisateur)
+  miseAJourQuantite(canapesUtilisateur)
+  suppressionCanape()
 }
 
-//validation du nom
-const validLastName = function (inputLastName) {
-  let lastNameErrorMsg = inputLastName.nextElementSibling
+const miseAJourPrix = function (canapesUtilisateur) {
+  let sommeDesQuantites = 0
+  let sommeDesPrix = 0
 
-  if (nameCheck.test(inputLastName.value)) {
-    lastNameErrorMsg.innerHTML = ''
-    return true
-  } else {
-    lastNameErrorMsg.innerHTML = "Le champ n'est pas valide !"
-    return false
-  }
+  canapesUtilisateur.forEach((canape) => {
+    sommeDesQuantites += canape.quantity
+    sommeDesPrix += canape.quantity * canape.price
+  })
+
+  let totalQuantity = document.querySelector('#totalQuantity')
+  totalQuantity.innerHTML = sommeDesQuantites
+
+  let priceDisplay = document.querySelector('#totalPrice')
+  priceDisplay.innerHTML = Math.round(sommeDesPrix)
 }
 
-//validation de l'adresse
-const validAddress = function (inputAddress) {
-  let addressErrorMsg = inputAddress.nextElementSibling
+const miseAJourQuantite = function (canapesUtilisateur) {
+  const inputQuantite = document.querySelectorAll('.itemQuantity')
+  inputQuantite.forEach((input) => {
+    input.addEventListener('change', (event) => {
+      event.preventDefault()
 
-  if (addressCheck.test(inputAddress.value)) {
-    addressErrorMsg.innerHTML = ''
-    return true
-  } else {
-    addressErrorMsg.innerHTML = "Le champ n'est pas valide !"
-    return false
-  }
-}
+      const canapesLocalStorage = JSON.parse(localStorage.getItem('panier'))
 
-//validation de la ville
-const validCity = function (inputCity) {
-  let cityErrorMsg = inputCity.nextElementSibling
+      const parent = input.closest('article')
+      const canapeId = parent.getAttribute('data-id')
+      const canapeColor = parent.getAttribute('data-color')
+      const quantite = input.valueAsNumber // On va mettre à jour la quantité dans le tableau du localStorage
 
-  if (cityCheck.test(inputCity.value)) {
-    cityErrorMsg.innerHTML = ''
-    return true
-  } else {
-    cityErrorMsg.innerHTML = "Le champ n'est pas valide !"
-    return false
-  }
-}
+      const indexTableauLS = canapesLocalStorage.findIndex(
+        (el) => el.id === canapeId && el.color === canapeColor,
+      )
+      canapesLocalStorage[indexTableauLS].quantity = quantite
+      localStorage.setItem('panier', JSON.stringify(canapesLocalStorage)) // On va mettre à jour la quantité dans l'objet canapesUtilisateur
 
-//validation de l'email
-const validEmail = function (inputEmail) {
-  let emailErrorMsg = inputEmail.nextElementSibling
+      const indexTableauCanapes = canapesUtilisateur.findIndex(
+        (el) => el._id === canapeId && el.color === canapeColor,
+      )
+      canapesUtilisateur[indexTableauCanapes].quantity = quantite
 
-  if (emailCheck.test(inputEmail.value)) {
-    emailErrorMsg.innerHTML = ''
-    return true
-  } else {
-    emailErrorMsg.innerHTML = "Le champ n'est pas valide !"
-    return false
-  }
-}
-
-// bouton commander
-function checkFinal() {
-  const btn_commander = document.getElementById('order')
-
-  btn_commander.addEventListener('click', (e) => {
-    e.preventDefault()
-
-    const inputName = document.getElementById('firstName')
-    const inputLastName = document.getElementById('lastName')
-    const inputAdress = document.getElementById('address')
-    const inputCity = document.getElementById('city')
-    const inputMail = document.getElementById('email')
-
-    if (
-      validLastName(inputLastName) &&
-      validFirstName(inputName) &&
-      validAddress(inputAdress) &&
-      validCity(inputCity) &&
-      validEmail(inputMail)
-    ) {
-      // le tableau pour les id
-      let itemId = []
-      for (let z = 0; z < arrayItem.length; z++) {
-        itemId.push(arrayItem[z].id)
-      }
-      console.log(itemId)
-
-      const order = {
-        contact: {
-          firstName: inputName.value,
-          lastName: inputLastName.value,
-          address: inputAdress.value,
-          city: inputCity.value,
-          email: inputMail.value,
-        },
-        products: itemId,
-      }
-
-      //envoi les données au serveur
-      const options = {
-        method: 'POST',
-        body: JSON.stringify(order),
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-      }
-
-      fetch('http://localhost:3000/api/products/order', options)
-        .then((response) => response.json())
-        .then((data) => {
-          console.log(data)
-          localStorage.clear()
-          localStorage.setItem('orderId', data.orderId)
-
-          document.location.href = `confirmation.html?orderId=${data.orderId}`
-        })
-    }
+      miseAJourPrix(canapesUtilisateur)
+    })
   })
 }
-checkFinal()
+
+const suppressionCanape = function () {
+  const boutonsDeSuppression = document.querySelectorAll('.deleteItem')
+  boutonsDeSuppression.forEach((bouton) => {
+    bouton.addEventListener('click', (event) => {
+      event.preventDefault()
+
+      const parent = bouton.closest('article')
+      const canapeId = parent.getAttribute('data-id')
+      const canapeCouleur = parent.getAttribute('data-color')
+
+      const nouvelleValeurLocalStorage = arrayItem.filter(
+        (el) => el.id !== canapeId || el.color !== canapeCouleur,
+      )
+
+      localStorage.setItem('panier', JSON.stringify(nouvelleValeurLocalStorage))
+
+      location.reload()
+    })
+  })
+}
+
+if (arrayItem === null || arrayItem.length === 0) {
+  const empty = `<p>Votre panier est vide</p>`
+  cartContainer.innerHTML = empty
+} else {
+  affichageDesCanapes()
+}
