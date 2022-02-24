@@ -4,8 +4,8 @@ let form = document.querySelector('.cart__order__form')
 let emailCheck = new RegExp(
   '^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9._]+[.]{1}[a-z]{2,10}$',
 )
-let nameCheck = new RegExp('^[a-zA-Zéè-]+$')
-let cityCheck = new RegExp('^[a-zA-Z]+(?:[s-][a-zA-Z]+)*$')
+let nameCheck = new RegExp("^[a-zA-Z ,.'-àâäéèêëïîôöùûüç]+$")
+let cityCheck = new RegExp("^[a-zA-Z ,.'-àâäéèêëïîôöùûüç]+$")
 let addressCheck = new RegExp(
   '^[0-9]{1,3}(?:(?:[,. ]){1}[-a-zA-Zàâäéèêëïîôöùûüç]+)+',
 )

@@ -58,7 +58,7 @@ const affichageDesCanapes = async function () {
           <div class="cart__item__content__settings">
             <div class="cart__item__content__settings__quantity">
               <p>Qté : </p>
-              <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${canape.quantity}">
+              <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${canape.quantity}" onFocus="this.blur()">
             </div>
             <div class="cart__item__content__settings__delete">
               <p class="deleteItem">Supprimer</p>
@@ -103,14 +103,14 @@ const miseAJourQuantite = function (canapesUtilisateur) {
       const parent = input.closest('article') //parent plus proche
       const canapeId = parent.getAttribute('data-id')
       const canapeColor = parent.getAttribute('data-color')
-      const quantite = input.valueAsNumber
-      
+      const quantite = input.valueAsNumber // transforme la valeur (chaine de caractère en number)
+
       // On va mettre à jour la quantité dans le tableau du localStorage
       const indexTableauLS = canapesLocalStorage.findIndex(
         (el) => el.id === canapeId && el.color === canapeColor,
       )
       canapesLocalStorage[indexTableauLS].quantity = quantite
-      localStorage.setItem('panier', JSON.stringify(canapesLocalStorage)) 
+      localStorage.setItem('panier', JSON.stringify(canapesLocalStorage))
 
       // On va mettre à jour la quantité dans l'objet canapesUtilisateur
       const indexTableauCanapes = canapesUtilisateur.findIndex(
@@ -129,7 +129,7 @@ const suppressionCanape = function () {
     bouton.addEventListener('click', (event) => {
       event.preventDefault()
 
-      const parent = bouton.closest('article')// parent
+      const parent = bouton.closest('article') // parent
       const canapeId = parent.getAttribute('data-id')
       const canapeCouleur = parent.getAttribute('data-color')
 
