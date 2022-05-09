@@ -1,15 +1,53 @@
-# Kanap #
 
-This is the front end and back end server for Project 5 of the Web Developer path.
+# Projet n°5 : Construire un e-commerce en JAVASCRIPT
 
-### Back end Prerequisites ###
+Projet professionnel à valider dans le cadre de mon diplôme Développeur Web
 
-You will need to have Node and `npm` installed locally on your machine.
 
-### Back end Installation ###
 
-Clone this repo. From the "back" folder of the project, run `npm install`. You 
-can then run the server with `node server`. 
-The server should run on `localhost` with default port `3000`. If the
-server runs on another port for any reason, this is printed to the
-console when the server starts, e.g. `Listening on port 3001`.
+
+
+## Compétences évaluées
+- Créer un plan de test pour une application
+- Interagir avec un web service avec JavaScript
+- Valider des données issues de sources externes
+- Gérer des événements JavaScript
+
+
+## Installation
+
+PREREQUIS : 
+```bash
+Installer Node.js 
+Cloner le repository
+```
+
+BACK END INSTALLATION
+
+```bash
+  npm install
+  nodemon server
+```
+
+Ouvrez votre navigateur et allez sur : http://localhost:3000 s'il est occupé utilisez http://localhost:3001
+## Environment Variables
+
+Dans le fichier .env, vous trouverez les éléments d'origines
+
+`DB_USERNAME`
+
+`DB_PASSWORD`
+
+`DB_NAME`
+
+
+
+
+## 🛠 Skills
+Javascript
+
+
+## Authors
+
+- [@raviiidev](https://www.github.com/raviiidev)
+
