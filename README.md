@@ -30,15 +30,6 @@ BACK END INSTALLATION
 ```
 
 Ouvrez votre navigateur et allez sur : http://localhost:3000 s'il est occupé utilisez http://localhost:3001
-## Environment Variables
-
-Dans le fichier .env, vous trouverez les éléments d'origines
-
-`DB_USERNAME`
-
-`DB_PASSWORD`
-
-`DB_NAME`
 
 
 
